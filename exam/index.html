@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>应统-智刷</title>
-    <!-- Tailwind CSS CDN -->
+    <title>应统-刷刷刷</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -119,7 +118,7 @@
         <footer class="bg-white border-t border-slate-100 p-4 shrink-0 shadow-inner">
             <div class="max-w-lg mx-auto flex justify-between items-center gap-3">
                 <button onclick="navigateQuestion(-1)" id="btn-prev" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition flex items-center justify-center gap-1.5 active:scale-95">
-                    <i class="fa-solid fa-chevron-left text-[10px]"></i> 上上一题
+                    <i class="fa-solid fa-chevron-left text-[10px]"></i> 上一题
                 </button>
 
                 <div class="flex-none">
@@ -138,13 +137,13 @@
         </footer>
     </div>
 
-    <div id="view-study" class="hidden flex-grow flex-col w-full overflow-hidden bg-slate-100">
-        <div class="bg-white px-4 py-2.5 border-b border-slate-200 flex justify-between items-center shrink-0 shadow-sm z-10">
+    <div id="view-study" class="hidden flex-grow flex-col w-full overflow-y-auto bg-slate-100 custom-scrollbar">
+        <div class="bg-white px-4 py-2.5 border-b border-slate-200 flex justify-between items-center shrink-0 shadow-sm sticky top-0 z-20">
             <h2 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-book-open text-indigo-500 mr-1.5"></i>核心考点速记卡片</h2>
             <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded font-semibold">20对精选考点</span>
         </div>
         
-        <main id="study-cards-container" class="flex-grow overflow-y-auto px-4 py-4 space-y-4 custom-scrollbar pb-6"></main>
+        <main id="study-cards-container" class="px-4 py-4 space-y-4 pb-12"></main>
     </div>
 
     <nav class="bg-white border-t border-slate-200 w-full shrink-0 pb-safe z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]">
@@ -284,7 +283,7 @@
                 type: 'mcq',
                 category: '分布特征的描述',
                 title: '左偏分布下的三值排序关系',
-                text: '在一次难度较高的期末考试中，若学生成绩呈现明显的<b>左偏（负偏，尾部在左侧）</b>分布，则其均值（$\\bar{x}$）、中位数（$M_e$）与众数（$M_o$）的大小排序为：',
+                text: '在一次难度较高的期末考试中，若学生成绩呈现明显的<b>left偏（负偏，尾部在左侧）</b>分布，则其均值（$\\bar{x}$）、中位数（$M_e$）与众数（$M_o$）的大小排序为：',
                 options: ['$\\bar{x} > M_e > M_o$', '$\\bar{x} < M_e < M_o$', '$\\bar{x} = M_e = M_o$', '$M_o < M_e < \\bar{x}$'],
                 correct: 1,
                 explanation: '左偏分布的长尾偏向左方（存在极端低分），均值最易受这些低分异常值的拖累，数值最小。排序关系为 $\\bar{x} < M_e < M_o$。'
@@ -575,7 +574,7 @@
             { category: '选择题考点', title: '7. 置信区间宽度与样本容量的关系', content: `<p>极限误差公式：$$E = z_{\\alpha/2} \\times \\frac{\\sigma}{\\sqrt{n}}$$</p><p class="mt-2"><b>规律：</b>当置信水平和总体变异程度不变时，若要缩小置信区间（变窄/更精准），必须<b>增大</b>样本容量 $n$。反之缩小 $n$ 会导致区间变宽。</p>` },
             { category: '选择题考点', title: '8. 点估计局限性与区间估计的引入', content: `<p><b>点估计缺陷：</b>未考虑抽样随机波动，无法给出误差范围和估计值的可靠程度。</p><p class="mt-1"><b>解决方法：</b>区间估计。提供由“点估计值 $\\pm$ 抽样极限误差”构成的区间，并赋予置信水平。</p>` },
             { category: '选择题考点', title: '9. 假设检验中显著性水平 $\\alpha$ 的辨析', content: `<p><b>本质：</b>指原假设 $H_0$ 为真时，却被拒绝的概率（第一类/弃真错误）。</p><p class="mt-1 text-rose-600"><i class="fa-solid fa-triangle-exclamation"></i> 避坑：</p><ul class="list-disc pl-4 text-slate-600"><li>不是“原假设不成立的概率”。</li><li>$\\alpha$ 减小，犯第二类错误 (取伪) 的概率 $\\beta$ 会增大（$n$ 固定时）。</li></ul>` },
-            { category: '选择题考点', title: '10. 单因素方差分析的三大基本假定', content: `<ul class="list-disc pl-4 space-y-1"><li><b>独立性：</b>各观测值相互独立。</li><li><b>正态性：</b>各控制变量水平下的因变量总体服从正态分布.</li><li><b>方差齐性：</b>各水平下总体的方差必须相等 ($\\sigma_1^2 = \\sigma_2^2 = \\dots = \\sigma_k^2$)。</li></ul>` },
+            { category: '选择题考点', title: '10. 单因素方差分析的三大基本假定', content: `<ul class="list-disc pl-4 space-y-1"><li><b>独立性：</b>各观测值相互独立。</li><li><b>正态性：</b>各控制变量水平下的因变量总体服从正态分布。</li><li><b>方差齐性：</b>各水平下总体的方差必须相等 ($\\sigma_1^2 = \\sigma_2^2 = \\dots = \\sigma_k^2$)。</li></ul>` },
             { category: '判断题考点', title: '11. 平均指数与加权算术平均指数', content: `<p><b>知识点：</b>平均指数不仅包括加权算术平均指数，还包括加权调和平均指数。只有在特定条件（如用 $q_0 p_0$ 加权）下，加权算术平均才等价于拉氏综合指数。</p>` },
             { category: '判断题考点', title: '12. 总量/质量/数量指标辨析', content: `<ul class="list-disc pl-4 space-y-1"><li><b>总量/数量指标：</b>反映“规模、大小”的绝对数（如总人口、GDP）。</li><li><b>质量指标：</b>反映“水平、结构、效益”的相对数或平均数（如合格率、平均单价）。</li></ul>` },
             { category: '判断题考点', title: '13. P值决策准则', content: `<p>若 $P\\text{值} \\le \\alpha$，则拒绝原假设 $H_0$。</p><p class="mt-1 text-slate-500">解释：P值越小，说明在原假设成立的前提下发生该样本现象的概率极低，怀疑其真实性从而拒绝。</p>` },
@@ -585,16 +584,16 @@
             { category: '判断题考点', title: '17. 自变量类型在分析中的处理', content: `<ul class="list-disc pl-4"><li><b>方差分析：</b>定类/定序自变量直接作为分组因素。</li><li><b>回归分析：</b>定类自变量不能直接带入连续模型，必须先转化为<b>虚拟变量 (Dummy Variable)</b>（如取0或1）。</li></ul>` },
             { category: '判断题考点', title: '18. 时间序列的趋势预测法', content: `<p>当逐期增长量大体相等（常数）时，呈现线性（等差）变动。最适合拟合<b>一元线性趋势方程</b> ($Y_t = a + bt$)。</p>` },
             { category: '判断题考点', title: '19. $P > \\alpha$ 时的决策', content: `<p><b>结论：</b>不能拒绝原假设 $H_0$。这意味着当前没有足够的异常证据推翻原假设。</p>` },
-            { category: '判断题考点', title: '20. 双总体均值检验方法选择', content: `<ul class="list-disc pl-4 space-y-1"><li>方差已知：无论样本大小一律用 $Z$ 检验。</li><li>方差未知且大样本：用样本方差代替，使用 $Z$ 检验。</li><li>方差未知且小样本 (正态)：必须使用 $t$ 检验，并计算合并方差 $s_p^2$。</li></ul>` }
+            { category: '判断题考点', title: '20. 双总体均值检验方法选择', content: `<ul class="list-disc pl-4 space-y-1"><li>方差已知：无论样本大小一律用 $Z$ 检验。</li><li>方差未知且大样本：用样本方差代替，使用 $Z$ 检验.</li><li>方差未知且小样本 (正态)：必须使用 $t$ 检验，并计算合并方差 $s_p^2$。</li></ul>` }
         ];
 
         // ==================== APP STATE ====================
         const appState = {
             currentTab: 'quiz', 
             currentMode: 'practice', 
-            wrongQuestions: new Set(), // 统一存放错误的题目 ID 字符串
+            wrongQuestions: new Set(), 
             starredQuestions: new Set(), 
-            answers: {}, // 格式如： { 'q_1': 1, 'tf_1': false }
+            answers: {}, 
             examSubmitted: false,
             currentList: [...dbQuestions], 
             currentIndex: 0, 
@@ -613,6 +612,7 @@
             if (tabId === 'quiz') {
                 viewQuiz.classList.remove('hidden');
                 viewStudy.classList.add('hidden');
+                viewStudy.classList.remove('flex'); // 确保隐藏彻底
                 tabQuizBtn.className = "flex-1 py-3 flex flex-col items-center gap-1 text-indigo-600 transition";
                 tabStudyBtn.className = "flex-1 py-3 flex flex-col items-center gap-1 text-slate-400 hover:text-indigo-500 transition";
                 topActions.style.opacity = "1";
@@ -620,6 +620,7 @@
             } else {
                 viewQuiz.classList.add('hidden');
                 viewStudy.classList.remove('hidden');
+                viewStudy.classList.add('flex');
                 tabQuizBtn.className = "flex-1 py-3 flex flex-col items-center gap-1 text-slate-400 hover:text-indigo-500 transition";
                 tabStudyBtn.className = "flex-1 py-3 flex flex-col items-center gap-1 text-indigo-600 transition";
                 topActions.style.opacity = "0";
@@ -638,7 +639,7 @@
             studyNotes.forEach((note) => {
                 const card = document.createElement('div');
                 let badgeColor = note.category.includes('选择题') ? 'bg-blue-100 text-blue-700' : 'bg-fuchsia-100 text-fuchsia-700';
-                card.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-200";
+                card.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-200 w-full shrink-0";
                 card.innerHTML = `
                     <div class="flex items-center space-x-2 mb-2">
                         <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeColor}">${note.category}</span>
@@ -674,7 +675,6 @@
                     submitBtn.classList.remove('hidden');
                 }
             }
-            // 切换模式不重置答案，直接重新渲染
             renderActiveQuestion();
             updateStats();
         }
@@ -700,7 +700,6 @@
             }
         }
 
-        // 核心修复：错题本筛选与题号解耦逻辑
         function toggleFilter() {
             const btn = document.getElementById('btn-filter-wrong');
             if (appState.filterMode === 'all') {
@@ -709,7 +708,6 @@
                     return;
                 }
                 appState.filterMode = 'wrong';
-                // 过滤出所有写错过的题目
                 appState.currentList = [...dbQuestions].filter(q => appState.wrongQuestions.has(q.id));
                 btn.className = "text-rose-500 font-bold transition flex items-center gap-1 scale-105 transform";
                 showToast('错题本筛选模式已开启！');
@@ -719,7 +717,7 @@
                 btn.className = "text-slate-500 hover:text-rose-500 transition flex items-center gap-1";
                 showToast('已切换至全部题目！');
             }
-            appState.currentIndex = 0; // 回归第一题防止索引溢出
+            appState.currentIndex = 0; 
             renderActiveQuestion();
             updateStats();
         }
@@ -740,6 +738,7 @@
 
             if (!activeQ) {
                 document.getElementById('lbl-question-index').innerText = "0/0";
+                document.getElementById('card-badge').innerText = "无";
                 document.getElementById('card-title').innerText = "暂无题目";
                 document.getElementById('card-text').innerText = "当前没有错题数据。";
                 choicesDiv.innerHTML = "";
@@ -758,7 +757,6 @@
             const isAnswered = userChoice !== undefined;
 
             if (activeQ.type === 'mcq') {
-                // ================== 单选题渲染分支 ==================
                 activeQ.options.forEach((opt, oIdx) => {
                     let optStyle = "border-slate-200 bg-white text-slate-700 active:bg-slate-50";
                     let prefixIcon = `<span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-xs font-bold text-slate-400 mr-3 shrink-0">${String.fromCharCode(65 + oIdx)}</span>`;
@@ -778,7 +776,6 @@
                             prefixIcon = `<span class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-700 flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-check"></i></span>`;
                         }
                     } else {
-                        // 模考模式
                         if (isSelected) {
                             optStyle = "bg-indigo-50 border-indigo-500 text-indigo-900 font-semibold";
                             prefixIcon = `<span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold mr-3 shrink-0">${String.fromCharCode(65 + oIdx)}</span>`;
@@ -801,11 +798,7 @@
                         </button>`;
                 });
             } else {
-                // ================== 判断题独立渲染分支 ==================
-                const tfOptions = [
-                    { value: true, label: '正确' },
-                    { value: false, label: '错误' }
-                ];
+                const tfOptions = [{ value: true, label: '正确' }, { value: false, label: '错误' }];
 
                 tfOptions.forEach(opt => {
                     let optStyle = "border-slate-200 bg-white text-slate-700 active:bg-slate-50";
@@ -826,7 +819,6 @@
                             prefixIcon = `<span class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-700 flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-check"></i></span>`;
                         }
                     } else {
-                        // 模考模式
                         if (isSelected) {
                             optStyle = "bg-indigo-50 border-indigo-500 text-indigo-900 font-semibold";
                             prefixIcon = `<span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs mr-3 shrink-0"><i class="${opt.value ? 'fa-solid fa-check' : 'fa-solid fa-xmark'} text-[10px]"></i></span>`;
@@ -850,7 +842,6 @@
                 });
             }
 
-            // ================== 解析与反馈逻辑 ==================
             const showFeedback = (appState.currentMode === 'practice' && isAnswered) || (appState.currentMode === 'exam' && appState.examSubmitted);
             if (showFeedback) {
                 const isCorrect = userChoice === activeQ.correct;
@@ -879,7 +870,6 @@
             }
         }
 
-        // 核心修复：单选题和判断题的值类型兼容与错题归档
         function chooseOption(value) {
             const activeQ = appState.currentList[appState.currentIndex];
             if (!activeQ) return;
@@ -887,9 +877,8 @@
             appState.answers[activeQ.id] = value;
 
             if (value !== activeQ.correct) {
-                appState.wrongQuestions.add(activeQ.id); // 归入错题本
+                appState.wrongQuestions.add(activeQ.id); 
             } else {
-                // 如果是背题模式下改对了，且不是从错题筛选视图进来的，可以移出
                 if (appState.currentMode === 'practice' && appState.filterMode === 'all') {
                     appState.wrongQuestions.delete(activeQ.id);
                 }
@@ -898,10 +887,8 @@
             renderActiveQuestion();
             updateStats();
 
-            // 背题模式下如果做对了，延迟自动跳转下一题
             if (appState.currentMode === 'practice' && value === activeQ.correct) {
                 setTimeout(() => {
-                    // 如果在错题本过滤模式下答对，由于移出了错题本，currentList会变动，原位刷新即可
                     if(appState.filterMode === 'wrong') {
                         appState.currentList = [...dbQuestions].filter(q => appState.wrongQuestions.has(q.id));
                         if(appState.currentIndex >= appState.currentList.length) {
@@ -934,7 +921,6 @@
             }
         }
 
-        // 核心修复：正确率及已答数据的精确处理
         function updateStats() {
             const answeredCount = Object.keys(appState.answers).length;
             const totalCount = dbQuestions.length;
