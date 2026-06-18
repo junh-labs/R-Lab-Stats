@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>应用统计学期末冲刺 · 移动端智能刷题</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for rendering statistical formulas -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Mobile Slide Animation styles */
+        .slide-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        .slide-card {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-full flex flex-col justify-between overflow-x-hidden select-none">
+
+    <!-- Top Native-style Navigation Bar -->
+    <header class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-800 text-white shadow-md shrink-0 safe-top">
+        <div class="px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-graduation-cap text-xl text-cyan-300"></i>
+                <div>
+                    <h1 class="text-sm font-bold tracking-tight">应用统计学期末冲刺</h1>
+                    <p class="text-[10px] text-indigo-200">20对双生考点 • 40题深度强化</p>
+                </div>
+            </div>
+            
+            <!-- Quick mode switch (Mobile Friendly Pills) -->
+            <div class="bg-black/20 p-0.5 rounded-full flex items-center space-x-1 text-[11px]">
+                <button id="btn-practice-mode" onclick="switchMode('practice')" class="px-2.5 py-1 rounded-full font-medium transition-all duration-200 bg-white text-indigo-900 shadow-sm">
+                    背题
+                </button>
+                <button id="btn-exam-mode" onclick="switchMode('exam')" class="px-2.5 py-1 rounded-full font-medium transition-all duration-200 text-white hover:bg-white/10">
+                    模考
+                </button>
+            </div>
+        </div>
+        <!-- Realtime Top Progress Bar -->
+        <div class="w-full bg-black/10 h-1">
+            <div id="top-progress-bar" class="bg-cyan-400 h-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Floating Stats Header Dashboard -->
+    <div class="bg-white border-b border-slate-100 shadow-sm px-4 py-2 flex justify-between items-center text-xs shrink-0">
+        <div class="flex items-center space-x-3">
+            <span class="text-slate-500">当前：<strong class="text-indigo-600 font-bold" id="lbl-question-index">1/40</strong></span>
+            <span class="text-slate-300">|</span>
+            <span class="text-slate-500">已答：<strong class="text-slate-700 font-bold" id="lbl-answered-count">0</strong></span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <span class="text-slate-500">正确率：<strong class="text-emerald-600 font-bold" id="lbl-accuracy">0%</strong></span>
+            <span class="text-slate-300">|</span>
+            <button onclick="toggleFilter()" id="btn-filter-wrong" class="text-slate-500 hover:text-rose-500 transition flex items-center gap-1">
+                <i class="fa-solid fa-circle-xmark text-rose-400"></i> 错题本(<span id="lbl-wrong-count" class="font-bold">0</span>)
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Swipe Area -->
+    <main class="flex-grow flex flex-col justify-center px-4 py-4 max-w-lg mx-auto w-full slide-container relative">
+        
+        <!-- Touch gesture guidance overlay (Hidden after interaction) -->
+        <div id="gesture-guide" class="absolute inset-0 bg-indigo-950/20 backdrop-blur-sm z-30 flex flex-col justify-center items-center text-white pointer-events-none transition-opacity duration-500 opacity-0 rounded-2xl">
+            <div class="bg-black/60 p-6 rounded-2xl text-center space-y-3">
+                <i class="fa-solid fa-arrows-left-right text-3xl text-cyan-300 animate-bounce"></i>
+                <p class="text-xs font-semibold">支持左右滑动切换题目</p>
+            </div>
+        </div>
+
+        <!-- Single Question Active Card -->
+        <div id="quiz-card" class="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 w-full flex flex-col justify-between min-h-[440px] max-h-[580px] slide-card overflow-y-auto custom-scrollbar">
+            <!-- Question details dynamic insertion -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center text-xs">
+                    <span id="card-badge" class="bg-indigo-50 text-indigo-600 font-semibold px-2 py-0.5 rounded-md">分类加载中</span>
+                    <button onclick="toggleStar()" class="p-1 text-slate-300 hover:text-rose-500 transition">
+                        <i id="star-icon" class="fa-regular fa-star text-base"></i>
+                    </button>
+                </div>
+                <div class="space-y-2">
+                    <h2 id="card-title" class="text-base font-bold text-slate-900 leading-snug">题目加载中...</h2>
+                    <div id="card-text" class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100/50">
+                        正在加载统计学题库，请稍候...
+                    </div>
+                </div>
+                <!-- Dynamic choices grid container -->
+                <div id="card-choices" class="space-y-2 pt-2">
+                    <!-- Option buttons -->
+                </div>
+            </div>
+
+            <!-- Dynamic Feedback & Explanation Block -->
+            <div id="card-feedback" class="mt-4 pt-3 border-t border-slate-100 text-xs hidden">
+                <!-- Standard explanation -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation Bar & Actions (Safe Area adaptive) -->
+    <footer class="bg-white border-t border-slate-100 p-4 shrink-0 shadow-inner safe-bottom">
+        <div class="max-w-lg mx-auto flex justify-between items-center gap-3">
+            <!-- Previous Button -->
+            <button onclick="navigateQuestion(-1)" id="btn-prev" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition flex items-center justify-center gap-1.5 active:scale-95">
+                <i class="fa-solid fa-chevron-left text-[10px]"></i> 上一题
+            </button>
+
+            <!-- Mode-dependent action pill -->
+            <div class="flex-none">
+                <button onclick="submitExam()" id="btn-exam-submit" class="hidden px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs transition shadow-md shadow-amber-500/20 active:scale-95">
+                    <i class="fa-solid fa-paper-plane mr-1"></i>交卷
+                </button>
+                <button onclick="resetAll()" id="btn-reset-shortcut" class="px-3.5 py-3 bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl text-xs transition" title="重置记录">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+
+            <!-- Next Button -->
+            <button onclick="navigateQuestion(1)" id="btn-next" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs transition flex items-center justify-center gap-1.5 active:scale-95">
+                下一题 <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- Core Interactive Application Logic -->
+    <script>
+        // Double-scaled detailed syllabus dataset (Total 40 questions: 20 MCQs, 20 TFs)
+        const dbQuestions = [
+            // ================== Topic 1: 20kg Concept Pair ==================
+            {
+                id: 'q_1',
+                type: 'mcq',
+                category: '描述统计基础',
+                title: '概念辨析：标志与指标的归属',
+                text: '某自动化生产线生产20kg袋装建材。在抽样质检中，“一袋具体抽中的建材重量为20.15kg”与“这批建材的平均袋装重量为19.98kg”，在统计学中分别称为什么？',
+                options: [
+                    '指标表现、数量标志表现',
+                    '数量标志表现、指标值',
+                    '品质标志、数量标志',
+                    '品质标志、指标表现'
+                ],
+                correct: 1,
+                explanation: '一袋具体建材的重量属于<b>个体单位的数量标志表现</b>；而反映该批次全体建材的平均重量属于<b>总体指标的指标值</b>。标志反映个体特征，指标反映总体特征。'
+            },
+            {
+                id: 'q_2',
+                type: 'mcq',
+                category: '描述统计基础',
+                title: '概念辨析：变量与常量的演变',
+                text: '在上述20kg袋装建材的生产工艺控制中，“标准设计规格20kg”与各袋建材在包装中“实际灌装的重量”在性质上分别属于：',
+                options: [
+                    '常量、变量',
+                    '变量、常量',
+                    '连续型变量、离散型变量',
+                    '数量标志、品质标志'
+                ],
+                correct: 0,
+                explanation: '“20kg的标准设计规格”是一个不变的参考标准，属于<b>常量</b>；而在实际灌装过程中由于随机误差导致的“实际称重数值”在各件产品间是变动的，属于<b>变量</b>。'
+            },
+
+            // ================== Topic 2: Indicator Features Pair ==================
+            {
+                id: 'q_3',
+                type: 'mcq',
+                category: '描述统计基础',
+                title: '统计指标特征：数量性与具体性',
+                text: '我们在应用统计中常说“由于降雨增加，本月该地区水稻亩产达到了450公斤”。该论述体现了统计指标的哪些主要特征？',
+                options: [
+                    '抽象性与综合性',
+                    '数量性与具体性',
+                    '主观性与绝对性',
+                    '综合性与离散性'
+                ],
+                correct: 1,
+                explanation: '该指标不仅有明确的数字“450公斤”（数量性），而且指代特定地区、特定时间、特定作物（具体性），说明指标绝非脱离现实社会的抽象公式。'
+            },
+            {
+                id: 'q_4',
+                type: 'mcq',
+                category: '描述统计基础',
+                title: '统计指标分类：总量与质量指标',
+                text: '在衡量某物流仓储公司的运营成效时，以下哪一组指标分类是<b>完全正确</b>的？',
+                options: [
+                    '总发货量属于质量指标，平均破损率属于总量指标',
+                    '总发货量属于总量指标，平均破损率属于质量指标',
+                    '总发货量属于数量指标，平均破损率属于总量指标',
+                    '两项均属于质量指标'
+                ],
+                correct: 1,
+                explanation: '“总发货量”反映的是企业运营的总规模，属于<b>总量（数量）指标</b>；“平均破损率”反映的是企业运作水平和质量，属于<b>质量指标</b>（通常表现为相对数或平均数）。'
+            },
+
+            // ================== Topic 3: Survey Method - Vaccine Pair ==================
+            {
+                id: 'q_5',
+                type: 'mcq',
+                category: '数据收集',
+                title: '新冠接种针数调查：调查法选择',
+                text: '为调查某超大社区居民新冠疫苗接种针数分布（0-4针）。在时间紧迫、预算有限且无法获取全部人员户籍变动信息的情况下，最适宜采用哪种调查方法？',
+                options: [
+                    '全面登记普查',
+                    '随机抽样调查',
+                    '典型案例调查',
+                    '自愿报名式重点调查'
+                ],
+                correct: 1,
+                explanation: '当总体规模较大、全面调查耗资过高、时效性要求紧迫时，<b>抽样调查</b>是通过部分样本科学推断总体的最有效非全面调查方法。'
+            },
+            {
+                id: 'q_6',
+                type: 'mcq',
+                category: '数据收集',
+                title: '疫苗调查变式：抽样设计辨析',
+                text: '若上述新冠接种调查中，研究团队决定将该社区按年龄划分为“老年、中青年、儿童”三组，并在每组中分别按比例随机抽取居民。这属于：',
+                options: [
+                    '整群抽样 (Cluster Sampling)',
+                    '分层抽样 (Stratified Sampling)',
+                    '系统抽样 (Systematic Sampling)',
+                    '简单随机抽样 (Simple Random)'
+                ],
+                correct: 1,
+                explanation: '按某种特征（如年龄、阶层）将总体划分为互不相交的组（层），再从各层中独立抽取样本，属于<b>分层抽样</b>，能有效提高样本的代表性。'
+            },
+
+            // ================== Topic 4: Census Pair ==================
+            {
+                id: 'q_7',
+                type: 'mcq',
+                category: '数据收集',
+                title: '全面调查（普查）性质考查',
+                text: '关于国家组织开展的“人口普查”和“经济普查”，下列陈述中<b>错误</b>的是：',
+                options: [
+                    '普查是一种具有周期性的特殊全面调查',
+                    '普查规定有统一的标准时点以避免重复和遗漏',
+                    '普查由于调查了全部单位，因此在实际操作中完全不存在任何误差',
+                    '普查一般不宜经常举行，因为耗资极大'
+                ],
+                correct: 2,
+                explanation: '普查虽然没有随机抽样引起的“抽样误差”，但由于涉及面太广、登记人员过多，在实际操作中难免会产生漏报、错报等<b>非抽样误差（登记性误差）</b>。'
+            },
+            {
+                id: 'q_8',
+                type: 'mcq',
+                category: '数据收集',
+                title: '非全面调查：典型调查与重点调查',
+                text: '某行业协会为了解行业发展瓶颈，仅对行业中排名前10位的领头骨干企业（其产值占全行业80%以上）进行深入调查。这在统计学上属于：',
+                options: [
+                    '普查',
+                    '典型调查',
+                    '重点调查',
+                    '抽样调查'
+                ],
+                correct: 2,
+                explanation: '在调查总体中只选择一部分具有决定性作用的重点单位（其标志值在总体中占绝大比重）进行调查，属于<b>重点调查</b>。'
+            },
+
+            // ================== Topic 5: Cumulative Frequency Pair ==================
+            {
+                id: 'q_9',
+                type: 'mcq',
+                category: '数据整理与展示',
+                title: '组距式次数分布：向上累计考点',
+                text: '在一项员工年龄分布表中，若“30-40岁”组的上限为 40 岁，该组的向上累计频数为 300 人。这意味着：',
+                options: [
+                    '年龄在40岁以上的人一共有300人',
+                    '年龄在30岁以下的人一共有300人',
+                    '年龄在40岁及以下的人一共有300人',
+                    '该组内（30-40岁之间）一共有300人'
+                ],
+                correct: 2,
+                explanation: '<b>向上累计频数</b>是指将各组频数从变量值小的组向变量值大的组顺次累加，因此其物理意义代表<b>小于或等于当前组上限（40岁）</b>的累计单位总数。'
+            },
+            {
+                id: 'q_10',
+                type: 'mcq',
+                category: '数据整理与展示',
+                title: '组距式次数分布：向下累计变式',
+                text: '若上述员工年龄分布表中，若“30-40岁”组的下限为 30 岁，该组的<b>向下累计频数</b>为 120 人。这意味着：',
+                options: [
+                    '年龄在30岁及以上的人一共有120人',
+                    '年龄在30岁以下的人一共有120人',
+                    '年龄在40岁以上的人一共有120人',
+                    '该组内一共有120人'
+                ],
+                correct: 0,
+                explanation: '<b>向下累计频数</b>是指从变量值最大的组开始向变量值小的组逆向累加，它代表<b>大于或等于当前组下限（30岁）</b>的累计单位总数。'
+            },
+
+            // ================== Topic 6: Skewed Distributions Pair ==================
+            {
+                id: 'q_11',
+                type: 'mcq',
+                category: '分布特征的描述',
+                title: '右偏分布下的三值排序关系',
+                text: '当某项投资收益率分布呈现典型的<b>右偏（正偏，尾部在右侧）</b>时，其均值（$\\bar{x}$）、中位数（$M_e$）与众数（$M_o$）三者的大小排序为：',
+                options: [
+                    '$\\bar{x} > M_e > M_o$',
+                    '$\\bar{x} < M_e < M_o$',
+                    '$\\bar{x} = M_e = M_o$',
+                    '$M_e > \\bar{x} > M_o$'
+                ],
+                correct: 0,
+                explanation: '在右偏分布中，由于右侧极少数极端大值的拉动作用，均值被大幅拉向右侧，导致其数值最大。排序为 $\\bar{x} > M_e > M_o$。'
+            },
+            {
+                id: 'q_12',
+                type: 'mcq',
+                category: '分布特征的描述',
+                title: '左偏分布下的三值排序关系',
+                text: '在一次难度较高的期末考试中，若学生成绩呈现明显的<b>左偏（负偏，尾部在左侧）</b>分布，则其均值（$\\bar{x}$）、中位数（$M_e$）与众数（$M_o$）的大小排序为：',
+                options: [
+                    '$\\bar{x} > M_e > M_o$',
+                    '$\\bar{x} < M_e < M_o$',
+                    '$\\bar{x} = M_e = M_o$',
+                    '$M_o < M_e < \\bar{x}$'
+                ],
+                correct: 1,
+                explanation: '左偏分布的长尾偏向左方（存在极端低分），均值最易受这些低分异常值的拖累，数值最小。排序关系为 $\\bar{x} < M_e < M_o$。'
+            },
+
+            // ================== Topic 7: Confidence Level & Sample Size Pair ==================
+            {
+                id: 'q_13',
+                type: 'mcq',
+                category: '参数估计',
+                title: '区间估计精度与样本容量的微调',
+                text: '在总体标准差 $\\sigma$ 与置信水平保持不变的前提下，若要求将总体均值的置信区间半宽度（抽样极限误差）<b>缩小为原来的 $\\frac{1}{3}$</b>，则样本量 $n$ 应变为：',
+                options: [
+                    '原来的 3 倍',
+                    '原来的 6 倍',
+                    '原来的 9 倍',
+                    '原来的 $\\frac{1}{9}$ 倍'
+                ],
+                correct: 2,
+                explanation: '由于抽样极限误差公式中 $E = z_{\\alpha/2} \\frac{\\sigma}{\\sqrt{n}}$。要使 $E$ 缩小为 $\\frac{1}{3}$，分母的 $\\sqrt{n}$ 必须扩大 3 倍，故样本容量 $n$ 必须扩大为原来的 9 倍。'
+            },
+            {
+                id: 'q_14',
+                type: 'mcq',
+                category: '参数估计',
+                title: '置信水平变动对置信区间宽度的影响',
+                text: '在样本容量 $n$ 和总体变异程度不变的前提下，若将置信水平从 90% <b>提升至 95%</b>，则置信区间的宽度会：',
+                options: [
+                    '变窄（估计精度提高）',
+                    '变宽（估计精度降低，但可靠性提高）',
+                    '保持完全不变',
+                    '无法确定其如何变动'
+                ],
+                correct: 1,
+                explanation: '置信水平 $1-\\alpha$ 越高，对应的双侧临界值 $z_{\\alpha/2}$ 越大（如从 1.645 变到 1.96），极限误差 $E$ 变大，导致置信区间<b>变宽</b>（即可靠性提高，但精度降低）。'
+            },
+
+            // ================== Topic 8: Point vs Interval Estimation Pair ==================
+            {
+                id: 'q_15',
+                type: 'mcq',
+                category: '参数估计',
+                title: '参数估计：点估计缺陷及解决方法',
+                text: '关于点估计（Point Estimation）的性质及缺陷，下列描述中<b>最精确</b>的是：',
+                options: [
+                    '点估计计算繁杂，无法应用于大样本分析',
+                    '点估计虽能给出单一估计值，但未结合抽样误差，无法给出这一估计的可靠程度与误差范围',
+                    '点估计的估计值绝对不会等于总体参数的真实值',
+                    '点估计的缺陷可以通过单纯增加样本容量得到完全消除'
+                ],
+                correct: 1,
+                explanation: '点估计不具有区间范围和概率置信度的评价能力。为了提供科学的误差评级与区间概率，必须结合抽样误差和临界值引入<b>区间估计</b>。'
+            },
+            {
+                id: 'q_16',
+                type: 'mcq',
+                category: '参数估计',
+                title: '区间估计：极限误差的构成',
+                text: '在总体均值区间估计中，被称为“抽样极限误差（Margin of Error）”或“估计误差范围”的项是：',
+                options: [
+                    '$\\bar{x}$',
+                    '$z_{\\alpha/2} \\frac{\\sigma}{\\sqrt{n}}$',
+                    '$\\frac{\\sigma}{\\sqrt{n}}$',
+                    '$\\bar{x} \\pm z_{\\alpha/2} \\frac{\\sigma}{\\sqrt{n}}$'
+                ],
+                correct: 1,
+                explanation: '极限误差为 $E = z_{\\alpha/2} \\frac{\\sigma}{\\sqrt{n}}$。它是估计值偏离真实参数的最大可能边界；而整个式子 $\\bar{x} \\pm E$ 则是置信区间本身。'
+            },
+
+            // ================== Topic 9: Type I Error Pair ==================
+            {
+                id: 'q_17',
+                type: 'mcq',
+                category: '假设检验',
+                title: '假设检验中的显著性水平α本质',
+                text: '在进行假设检验决策时，我们设定的显著性水平 $\\alpha = 0.05$。其正确的概率含义是：',
+                options: [
+                    '当原假设不成立时，我们却接受了原假设的概率',
+                    '当原假设实际上为真时，我们由于抽样误差做出了拒绝原假设的错误概率',
+                    '原假设成立的真实概率为 5%',
+                    '备择假设成立的概率为 95%'
+                ],
+                correct: 1,
+                explanation: '显著性水平 $\\alpha$ 代表<b>第一类错误（弃真错误）</b>的发生概率。即在 $H_0$ 实际为真时，却由于样本数据过于极端而拒绝了它的最大允许概率。'
+            },
+            {
+                id: 'q_18',
+                type: 'mcq',
+                category: '假设检验',
+                title: '两类错误的此消彼长关系',
+                text: '在样本量 $n$ 保持固定不变的前提下，若我们为了极度避免“弃真”而将显著性水平 $\\alpha$ 从 0.05 <b>降低到 0.01</b>，则：',
+                options: [
+                    '犯第二类错误（取伪错误）的概率 $\\beta$ 也会减小',
+                    '犯第二类错误（取伪错误）的概率 $\\beta$ 会随之增大',
+                    '第一类和第二类错误的概率不受显著性水平变动影响',
+                    '检验效能 (Power of Test) 将会大幅提高'
+                ],
+                correct: 1,
+                explanation: '在样本容量 $n$ 固定的情况下，第一类错误概率 $\\alpha$ 与第二类错误概率 $\\beta$ 是此消彼长的。$\\alpha$ 减小，接受原假设的区域扩大，使得犯“取伪错误”的可能 $\\beta$ 相应增加。'
+            },
+
+            // ================== Topic 10: ANOVA Assumptions Pair ==================
+            {
+                id: 'q_19',
+                type: 'mcq',
+                category: '方差分析',
+                title: '单因素方差分析的基本假定',
+                text: '关于单因素方差分析（ANOVA）的三个核心假定，下列选项中不属于其前提假设的是：',
+                options: [
+                    '各组内部及各组之间的样本观测值是相互独立的',
+                    '各组样本在总体中都应当服从正态分布',
+                    '各组总体的方差必须具有齐性（即相等）',
+                    '各组总体的期望均值在初始状态下必须完全相等'
+                ],
+                correct: 3,
+                explanation: '方差分析的三大假定是：<b>独立性、正态性、方差齐性</b>。而“均值是否相等”是待检验的<b>原假设 $H_0$</b>，不是分析的前提假定。'
+            },
+            {
+                id: 'q_20',
+                type: 'mcq',
+                category: '方差分析',
+                title: '方差分析假定违背的诊断方法',
+                text: '在实际应用方差分析前，研究人员通常采用以下哪种统计检验来对“方差齐性（各总体方差相等）”这一假定进行诊断和验证？',
+                options: [
+                    '莱文检验 (Levene\'s Test)',
+                    't 检验 (t-Test)',
+                    '德宾-瓦森检验 (Durbin-Watson Test)',
+                    '卡方拟合优度检验'
+                ],
+                correct: 0,
+                explanation: '<b>莱文检验 (Levene\'s Test)</b> 或巴特莱特检验 (Bartlett\'s Test) 常用于多组独立样本的方差齐性检验。若其P值显著，说明各组方差不齐。'
+            },
+
+            // ================== Topic 11 (TF) : Average Indices ==================
+            {
+                id: 'tf_1',
+                type: 'tf',
+                category: '统计指数',
+                title: '平均指数与加权算术平均指数的等同关系辨析',
+                text: '平均指数不仅等同于加权算术平均指数，它在统计应用中并没有其他表现形式。',
+                correct: false,
+                explanation: '错误。平均指数是总指数的形式之一，不仅包括<b>加权算术平均指数</b>，还包括<b>加权调和平均指数</b>。不能一概而论。'
+            },
+            {
+                id: 'tf_2',
+                type: 'tf',
+                category: '统计指数',
+                title: '平均指数等价综合指数的加权条件',
+                text: '只有在采用基期总值（$q_0 p_0$）作为权数的前提下，加权算术平均指数才在计算结果上与拉氏数量指数完全等价。',
+                correct: true,
+                explanation: '正确。加权算术平均指数 $\\frac{\\sum K_q (q_0 p_0)}{\\sum q_0 p_0}$（其中 $K_q = \\frac{q_1}{q_0}$）展开后即为拉氏数量指数 $\\frac{\\sum q_1 p_0}{\\sum q_0 p_0}$。'
+            },
+
+            // ================== Topic 12 (TF) : Indicator Classifications ==================
+            {
+                id: 'tf_3',
+                type: 'tf',
+                category: '描述统计基础',
+                title: '总量指标的数理特征',
+                text: '某地区的“地区生产总值(GDP)”、“社会消费品零售总额”由于带有总规模、总水平的绝对特征，因此均属于总量（数量）指标。',
+                correct: true,
+                explanation: '正确。总量指标是用绝对数来反映社会经济现象在特定状态下的总规模或工作总量。'
+            },
+            {
+                id: 'tf_4',
+                type: 'tf',
+                category: '描述统计基础',
+                title: '质量指标的数理特征',
+                text: '某上市公司的“资产负债率”、“平均人工成本”由于是以相对比率或平均数形式表现的，因此在统计分类上应划为质量指标。',
+                correct: true,
+                explanation: '正确。质量指标反映总体的结构、比率、强度或效益，主要用相对指标或平均指标表达。'
+            },
+
+            // ================== Topic 13 (TF) : P-value Decision Rule ==================
+            {
+                id: 'tf_5',
+                type: 'tf',
+                category: '假设检验',
+                title: 'P值决策规则判定',
+                text: '在进行参数假设检验时，若我们计算得出的双侧检验 $P$ 值大于给定的显著性水平 $\\alpha$，则我们应该做出“不拒绝原假设 $H_0$”的决定。',
+                correct: true,
+                explanation: '正确。$P$ 值大于 $\\alpha$ 代表观测结果不具有统计学显著性，因此无法推翻、应当不拒绝原假设。'
+            },
+            {
+                id: 'tf_6',
+                type: 'tf',
+                category: '假设检验',
+                title: 'P值物理意义判定',
+                text: '假设检验中的 $P$ 值代表的是“原假设成立的概率”。',
+                correct: false,
+                explanation: '错误。$P$ 值是在<b>原假设为真</b>的条件下，获得当前样本观测值或更极端结果的概率。它反映对原假设的支持强弱，而非原假设本身的概率。'
+            },
+
+            // ================== Topic 14 (TF) : Sample Size & Precision ==================
+            {
+                id: 'tf_7',
+                type: 'tf',
+                category: '参数估计',
+                title: '样本量对抽样估计精度的影响',
+                text: '在总体方差相同的情况下，增大样本量 $n$ 可以直接减小抽样平均误差，从而大幅提升参数区间估计的精准度。',
+                correct: true,
+                explanation: '正确。因为抽样标准误差 $S_e = \\frac{\\sigma}{\\sqrt{n}}$。样本量大，抽样标准误差变小，误差越小，估计精度越好。'
+            },
+            {
+                id: 'tf_8',
+                type: 'tf',
+                category: '参数估计',
+                title: '样本量对置信区间宽度的影响',
+                text: '对于同一个总体进行区间估计，在其他条件相同下，样本量越大，构建出的置信区间宽度就越宽。',
+                correct: false,
+                explanation: '错误。样本量 $n$ 越大，极限误差 $E$ 越小，因此得到的置信区间宽度越<b>窄</b>（窄区间代表估计精度更高）。'
+            },
+
+            // ================== Topic 15 (TF) : ANOVA Hypotheses ==================
+            {
+                id: 'tf_9',
+                type: 'tf',
+                category: '方差分析',
+                title: '方差分析的原假设表述',
+                text: '在单因素方差分析中，设有 $k$ 个处理水平，其原假设通常写作 $H_0: \\mu_1 = \\mu_2 = \\dots = \\mu_k$。',
+                correct: true,
+                explanation: '正确。方差分析的原假设旨在探索各分类水平之间的期望均值是否有显著差异。其零假设一律是各水平均值相等。'
+            },
+            {
+                id: 'tf_10',
+                type: 'tf',
+                category: '方差分析',
+                title: '方差分析的备择假设表述',
+                text: '方差分析的备择假设 $H_1$ 的精确含义是指“因素各水平下的总体均值 $\\mu_1, \\mu_2, \\dots, \\mu_k$ 完全不相等（均不相同）”。',
+                correct: false,
+                explanation: '错误。方差分析的备择假设 $H_1$ 为“各组总体均值<b>不全相等</b>”，也就是说只要其中至少有两组之间存在显著差异即可。'
+            },
+
+            // ================== Topic 16 (TF) : Kurtosis Pair ==================
+            {
+                id: 'tf_11',
+                type: 'tf',
+                category: '分布特征的描述',
+                title: '超额峰度系数大于0的含义',
+                text: '若某工厂零件尺寸分布的超额峰度系数 $K$ 值为 70（$K > 0$），说明该零件分布呈现高峰态（尖峰分布）。',
+                correct: true,
+                explanation: '正确。峰度系数 $K > 0$ 表示该分布在中心部位比正态分布更为尖峭（陡峭），且拥有肥厚的厚尾（重尾）。'
+            },
+            {
+                id: 'tf_12',
+                type: 'tf',
+                category: '分布特征的描述',
+                title: '超额峰度系数小于0的含义',
+                text: '超额峰度系数 $K$ 小于 0 意味着其分布比正态分布具有更为扁平、平缓的顶部特征，属于平峰态分布。',
+                correct: true,
+                explanation: '正确。$K < 0$ 代表分布在顶部表现得较为平缓宽阔，即为平峰态。'
+            },
+
+            // ================== Topic 17 (TF) : Variable Dummy Coding Pair ==================
+            {
+                id: 'tf_13',
+                type: 'tf',
+                category: '自变量类型在分析中的差异',
+                title: '方差分析对自变量类型的要求',
+                text: '方差分析（ANOVA）在应用中，其因变量必须是数值型（连续）变量，而自变量通常必须是定类或定序变量。',
+                correct: true,
+                explanation: '正确。方差分析的核心就是检验一个分类型自变量对一个连续型因变量的期望均值影响是否显著。'
+            },
+            {
+                id: 'tf_14',
+                type: 'tf',
+                category: '自变量类型在分析中的差异',
+                title: '回归分析对分类自变量的处理要求',
+                text: '若在多元线性回归中存在“性别”这一类定类自变量，必须直接将原有的①男、②女这些类别代入公式计算，不可转化为 0 和 1 的虚拟编码。',
+                correct: false,
+                explanation: '错误。在回归分析中，定类自变量不能直接作为数值参与拟合，否则会破坏线性运算逻辑。必须经过<b>虚拟变量（哑变量）</b>编码转化（如：女=1，男=0）后才能引入。'
+            },
+
+            // ================== Topic 18 (TF) : Time Series Trend Methods Pair ==================
+            {
+                id: 'tf_15',
+                type: 'tf',
+                category: '时间序列分析',
+                title: '时间序列等差趋势预测方法',
+                text: '若时间序列中各年的逐期增长量大体相等（即基本呈等差级数变动），则适宜拟合一元线性趋势模型进行长期预测。',
+                correct: true,
+                explanation: '正确。逐期增长量相等意味着序列具有稳定的、按绝对数等差变化趋势，适合一元线性拟合。'
+            },
+            {
+                id: 'tf_16',
+                type: 'tf',
+                category: '时间序列分析',
+                title: '时间序列等比趋势预测方法',
+                text: '若时间序列中各年的环比发展速度大体相等（即呈等比级数变动），则适宜采用线性趋势方程开展推测。',
+                correct: false,
+                explanation: '错误。环比发展速度大体相等，表明序列呈现出按固定比例指数变动的趋势。应当拟合指数曲线或采用几何平均模型进行预测。'
+            },
+
+            // ================== Topic 19 (TF) : P > Alpha Decisions Pair ==================
+            {
+                id: 'tf_17',
+                type: 'tf',
+                category: '假设检验',
+                title: 'P值大于显性水平时的最终决策',
+                text: '当假设检验计算出的 $P \\text{值} > \\alpha$ 时，合理的统计学结论是“不拒绝原假设”，认为样本并无充分的证据证明原假设不成立。',
+                correct: true,
+                explanation: '正确。$P$ 值大于显著性阈值代表结果发生概率并不罕见，因而我们由于“证据不足”而无法将其拒绝。'
+            },
+            {
+                id: 'tf_18',
+                type: 'tf',
+                category: '假设检验',
+                title: '不拒绝原假设的数学证明深度辨析',
+                text: '假设检验中我们不拒绝原假设 $H_0$，说明我们已经在数学上100%严谨地推导证明了 $H_0$ 是绝对真实、不容置疑的。',
+                correct: false,
+                explanation: '错误。假设检验结论是基于小概率原理和样本推断做出的。<b>“不拒绝原假设”不等于“证明原假设为真”</b>，只是说当前样本数据还没有提供足够强的反面证据去推翻它。'
+            },
+
+            // ================== Topic 20 (TF) : Dual Population Mean Comparison Pair ==================
+            {
+                id: 'tf_19',
+                type: 'tf',
+                category: '参数估计与检验方法选择',
+                title: '双总体期望均值：方差已知时的选择',
+                text: '检验两个独立总体的期望均值是否相等时，只要已知两个总体的方差 $\\sigma_1^2, \\sigma_2^2$，无论两样本大小，一律采用 $Z$ 检验。',
+                correct: true,
+                explanation: '正确。总体方差已知是标准的正态总体参数检验情形，依据中心极限定理，应当采用 $Z$ 检验。'
+            },
+            {
+                id: 'tf_20',
+                type: 'tf',
+                category: '参数估计与检验方法选择',
+                title: '双总体期望均值：小样本方差未知时的选择',
+                text: '在检验两个独立总体均值是否相等时，若两总体方差未知，但在正态前提下样本容量均为小样本（如 $n_1=15, n_2=12$），一律采用 $t$ 检验并需合并样本方差。',
+                correct: true,
+                explanation: '正确。在正态性假定下，小样本、方差未知且假定相等时，使用双独立样本 $t$ 检验，需要依靠合并方差 $s_p^2$ 计算检验统计量。'
+            }
+        ];
+
+        // Mobile Responsive App State Configuration
+        const appState = {
+            currentMode: 'practice', // 'practice' or 'exam'
+            wrongQuestions: new Set(), // Storage of wrong ids
+            starredQuestions: new Set(), // User custom starred ids
+            answers: {}, // Question user answer index mapping
+            examSubmitted: false, // Flag to show solutions in exam mode
+            currentList: [...dbQuestions], // Current rendered subset of questions
+            currentIndex: 0, // Current viewport index (0 to 39)
+            filterMode: 'all' // 'all' or 'wrong'
+        };
+
+        // UI Handlers for Mobile single-page layout
+        function renderCategoryList() {
+            // Mobile app sidebar logic simplified or folded for extreme single-question focus
+        }
+
+        function switchMode(mode) {
+            appState.currentMode = mode;
+            const prBtn = document.getElementById('btn-practice-mode');
+            const exBtn = document.getElementById('btn-exam-mode');
+            const submitBtn = document.getElementById('btn-exam-submit');
+
+            if (mode === 'practice') {
+                prBtn.className = "px-3 py-1 bg-white text-indigo-900 rounded-full font-bold shadow-sm";
+                exBtn.className = "px-3 py-1 text-white hover:bg-white/10 rounded-full font-medium transition-all";
+                submitBtn.classList.add('hidden');
+            } else {
+                exBtn.className = "px-3 py-1 bg-white text-indigo-900 rounded-full font-bold shadow-sm";
+                prBtn.className = "px-3 py-1 text-white hover:bg-white/10 rounded-full font-medium transition-all";
+                if (!appState.examSubmitted) {
+                    submitBtn.classList.remove('hidden');
+                }
+            }
+
+            renderActiveQuestion();
+            updateStats();
+        }
+
+        // Starred custom list
+        function toggleStar() {
+            const activeQ = appState.currentList[appState.currentIndex];
+            if (!activeQ) return;
+
+            if (appState.starredQuestions.has(activeQ.id)) {
+                appState.starredQuestions.delete(activeQ.id);
+            } else {
+                appState.starredQuestions.add(activeQ.id);
+            }
+            updateStarIcon();
+        }
+
+        function updateStarIcon() {
+            const activeQ = appState.currentList[appState.currentIndex];
+            const icon = document.getElementById('star-icon');
+            if (activeQ && appState.starredQuestions.has(activeQ.id)) {
+                icon.className = "fa-solid fa-star text-rose-500";
+            } else {
+                icon.className = "fa-regular fa-star text-slate-300";
+            }
+        }
+
+        // Toggle Filter: Wrong Questions
+        function toggleFilter() {
+            const btn = document.getElementById('btn-filter-wrong');
+            if (appState.filterMode === 'all') {
+                if (appState.wrongQuestions.size === 0) {
+                    showToast('您的错题本目前是空的哦！加油！', 'success');
+                    return;
+                }
+                appState.filterMode = 'wrong';
+                appState.currentList = [...dbQuestions].filter(q => appState.wrongQuestions.has(q.id));
+                btn.className = "text-rose-500 font-bold transition flex items-center gap-1 scale-105 transform";
+                showToast('错题筛选模式已开启！', 'success');
+            } else {
+                appState.filterMode = 'all';
+                appState.currentList = [...dbQuestions];
+                btn.className = "text-slate-500 hover:text-rose-500 transition flex items-center gap-1";
+                showToast('已切换至全部题目！', 'success');
+            }
+            appState.currentIndex = 0;
+            renderActiveQuestion();
+            updateStats();
+        }
+
+        // Multi-touch gestures (Left/Right swipes) for seamless mobile swiping
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function handleTouchStart(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }
+
+        function handleTouchEnd(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }
+
+        function handleSwipe() {
+            const diff = touchStartX - touchEndX;
+            // threshold of 50px for swipes
+            if (diff > 60) {
+                // Swiped left -> Next Question
+                navigateQuestion(1);
+            } else if (diff < -60) {
+                // Swiped right -> Previous Question
+                navigateQuestion(-1);
+            }
+        }
+
+        // Register Touch Gestures on standard quiz card
+        const swipeZone = document.getElementById('quiz-card');
+        swipeZone.addEventListener('touchstart', handleTouchStart, false);
+        swipeZone.addEventListener('touchend', handleTouchEnd, false);
+
+        // Core Question Renderer
+        function renderActiveQuestion() {
+            const activeQ = appState.currentList[appState.currentIndex];
+            if (!activeQ) {
+                // Fallback if list is empty
+                document.getElementById('card-title').innerText = "暂无题目";
+                document.getElementById('card-text').innerText = "当前没有符合条件的题目。";
+                document.getElementById('card-choices').innerHTML = "";
+                document.getElementById('card-feedback').classList.add('hidden');
+                return;
+            }
+
+            // Standard Update Info
+            document.getElementById('lbl-question-index').innerText = `${appState.currentIndex + 1}/${appState.currentList.length}`;
+            document.getElementById('card-badge').innerText = activeQ.category;
+            document.getElementById('card-title').innerHTML = `<span class="text-indigo-600 mr-1.5 font-extrabold">[${activeQ.type === 'mcq' ? '单选' : '判断'}]</span>${activeQ.title}`;
+            document.getElementById('card-text').innerHTML = activeQ.text;
+
+            updateStarIcon();
+
+            // Render Choices grid with oversized mobile-friendly padding
+            const choicesDiv = document.getElementById('card-choices');
+            choicesDiv.innerHTML = '';
+
+            const userChoice = appState.answers[activeQ.id];
+            const isAnswered = userChoice !== undefined;
+
+            if (activeQ.type === 'mcq') {
+                activeQ.options.forEach((opt, oIdx) => {
+                    let optStyle = "border-slate-200 bg-white text-slate-700 active:bg-slate-50";
+                    let prefixIcon = `<span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-xs font-bold text-slate-400 mr-3 shrink-0">${String.fromCharCode(65 + oIdx)}</span>`;
+                    
+                    const isSelected = userChoice === oIdx;
+
+                    if (appState.currentMode === 'practice') {
+                        if (isSelected) {
+                            if (oIdx === activeQ.correct) {
+                                optStyle = "bg-emerald-50 border-emerald-400 text-emerald-900 font-semibold";
+                                prefixIcon = `<span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-check"></i></span>`;
+                            } else {
+                                optStyle = "bg-rose-50 border-rose-400 text-rose-900 font-semibold";
+                                prefixIcon = `<span class="w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-xmark"></i></span>`;
+                            }
+                        } else if (oIdx === activeQ.correct && isAnswered) {
+                            optStyle = "bg-emerald-50/50 border-emerald-300 text-emerald-800";
+                            prefixIcon = `<span class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-700 flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-check"></i></span>`;
+                        }
+                    } else {
+                        // Exam Mode
+                        if (isSelected) {
+                            optStyle = "bg-indigo-50 border-indigo-500 text-indigo-900 font-semibold";
+                            prefixIcon = `<span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold mr-3 shrink-0">${String.fromCharCode(65 + oIdx)}</span>`;
+                        }
+                        if (appState.examSubmitted) {
+                            if (oIdx === activeQ.correct) {
+                                optStyle = "bg-emerald-50 border-emerald-400 text-emerald-900 font-semibold";
+                                prefixIcon = `<span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-check"></i></span>`;
+                            } else if (isSelected) {
+                                optStyle = "bg-rose-50 border-rose-400 text-rose-900 font-semibold";
+                                prefixIcon = `<span class="w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-xmark"></i></span>`;
+                            }
+                        }
+                    }
+
+                    const disabledAttr = (appState.currentMode === 'practice' && isAnswered) || (appState.currentMode === 'exam' && appState.examSubmitted) ? "disabled" : "";
+
+                    choicesDiv.innerHTML += `
+                        <button onclick="chooseOption(${oIdx})" ${disabledAttr} class="w-full text-left p-3.5 rounded-xl border text-xs transition flex items-center shadow-sm ${optStyle}">
+                            ${prefixIcon}
+                            <span class="flex-1">${opt}</span>
+                        </button>
+                    `;
+                });
+            } else {
+                // True or False (TF) options
+                const tfOptions = [
+                    { value: true, label: '正确', icon: 'fa-regular fa-circle-check text-emerald-500 text-base' },
+                    { value: false, label: '错误', icon: 'fa-regular fa-circle-xmark text-rose-500 text-base' }
+                ];
+
+                tfOptions.forEach(opt => {
+                    let optStyle = "border-slate-200 bg-white text-slate-700 active:bg-slate-50";
+                    let prefixIcon = `<span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-slate-400 mr-3 shrink-0"><i class="${opt.value ? 'fa-solid fa-check' : 'fa-solid fa-xmark'} text-[10px]"></i></span>`;
+                    
+                    const isSelected = userChoice === opt.value;
+
+                    if (appState.currentMode === 'practice') {
+                        if (isSelected) {
+                            if (opt.value === activeQ.correct) {
+                                optStyle = "bg-emerald-50 border-emerald-400 text-emerald-900 font-semibold";
+                                prefixIcon = `<span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-check"></i></span>`;
+                            } else {
+                                optStyle = "bg-rose-50 border-rose-400 text-rose-900 font-semibold";
+                                prefixIcon = `<span class="w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-xmark"></i></span>`;
+                            }
+                        } else if (opt.value === activeQ.correct && isAnswered) {
+                            optStyle = "bg-emerald-50/50 border-emerald-300 text-emerald-800";
+                            prefixIcon = `<span class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-700 flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-check"></i></span>`;
+                        }
+                    } else {
+                        // Exam Mode
+                        if (isSelected) {
+                            optStyle = "bg-indigo-50 border-indigo-500 text-indigo-900 font-semibold";
+                            prefixIcon = `<span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs mr-3 shrink-0"><i class="${opt.value ? 'fa-solid fa-check' : 'fa-solid fa-xmark'} text-[10px]"></i></span>`;
+                        }
+                        if (appState.examSubmitted) {
+                            if (opt.value === activeQ.correct) {
+                                optStyle = "bg-emerald-50 border-emerald-400 text-emerald-900 font-semibold";
+                                prefixIcon = `<span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-check"></i></span>`;
+                            } else if (isSelected) {
+                                optStyle = "bg-rose-50 border-rose-400 text-rose-900 font-semibold";
+                                prefixIcon = `<span class="w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs mr-3 shrink-0"><i class="fa-solid fa-xmark"></i></span>`;
+                            }
+                        }
+                    }
+
+                    const disabledAttr = (appState.currentMode === 'practice' && isAnswered) || (appState.currentMode === 'exam' && appState.examSubmitted) ? "disabled" : "";
+
+                    choicesDiv.innerHTML += `
+                        <button onclick="chooseOption(${opt.value})" ${disabledAttr} class="w-full text-left p-3.5 rounded-xl border text-xs transition flex items-center shadow-sm ${optStyle}">
+                            ${prefixIcon}
+                            <span class="flex-1 font-semibold">${opt.label}</span>
+                        </button>
+                    `;
+                });
+            }
+
+            // Render Explanations and standard feedback
+            const feedbackBlock = document.getElementById('card-feedback');
+            const showFeedback = (appState.currentMode === 'practice' && isAnswered) || (appState.currentMode === 'exam' && appState.examSubmitted);
+
+            if (showFeedback) {
+                const isCorrect = userChoice === activeQ.correct;
+                feedbackBlock.className = `mt-4 p-3.5 rounded-xl border text-[11px] leading-relaxed transition-all duration-300 ${isCorrect ? 'bg-emerald-50/50 border-emerald-100 text-slate-700' : 'bg-rose-50/50 border-rose-100 text-slate-700'}`;
+                
+                let feedbackStatus = isCorrect 
+                    ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 mb-2"><i class="fa-solid fa-circle-check mr-1"></i>正确</span>`
+                    : `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-800 mb-2"><i class="fa-solid fa-circle-xmark mr-1"></i>错误</span>`;
+
+                let rightAnswerText = activeQ.type === 'mcq'
+                    ? String.fromCharCode(65 + activeQ.correct)
+                    : (activeQ.correct ? '正确' : '错误');
+
+                feedbackBlock.innerHTML = `
+                    ${feedbackStatus}
+                    <p class="mb-1 font-bold text-slate-900">参考答案：${rightAnswerText}</p>
+                    <div class="space-y-1 pt-1.5 border-t border-slate-100">
+                        <span class="font-semibold text-slate-500 block text-[10px]">考点深析：</span>
+                        <div class="text-slate-600 leading-normal">${activeQ.explanation}</div>
+                    </div>
+                `;
+                feedbackBlock.classList.remove('hidden');
+            } else {
+                feedbackBlock.classList.add('hidden');
+            }
+
+            // Recompile math equations dynamically with MathJax
+            if (window.MathJax && window.MathJax.typeset) {
+                window.MathJax.typeset();
+            }
+        }
+
+        // Answer Selector Logic
+        function chooseOption(value) {
+            const activeQ = appState.currentList[appState.currentIndex];
+            if (!activeQ) return;
+
+            appState.answers[activeQ.id] = value;
+
+            // Log mistakes immediately in background or practice mode
+            if (value !== activeQ.correct) {
+                appState.wrongQuestions.add(activeQ.id);
+            } else {
+                if (appState.currentMode === 'practice') {
+                    appState.wrongQuestions.delete(activeQ.id);
+                }
+            }
+
+            renderActiveQuestion();
+            updateStats();
+
+            // Auto navigate to next question after short delay in practice mode on correct answer
+            if (appState.currentMode === 'practice' && value === activeQ.correct) {
+                setTimeout(() => {
+                    navigateQuestion(1);
+                }, 900);
+            }
+        }
+
+        // Left-right navigation helper
+        function navigateQuestion(offset) {
+            const newIndex = appState.currentIndex + offset;
+            if (newIndex >= 0 && newIndex < appState.currentList.length) {
+                appState.currentIndex = newIndex;
+                
+                // Slide Transition Animations on Card using Tailwind class transition
+                const card = document.getElementById('quiz-card');
+                const sign = offset > 0 ? 1 : -1;
+                card.style.transform = `translateX(${sign * -40}px)`;
+                card.style.opacity = '0';
+                
+                setTimeout(() => {
+                    renderActiveQuestion();
+                    card.style.transform = 'translateX(0)';
+                    card.style.opacity = '1';
+                }, 150);
+            } else {
+                if (offset > 0) {
+                    showToast('已经是最后一题啦！', 'success');
+                } else {
+                    showToast('已经是第一题啦！', 'success');
+                }
+            }
+        }
+
+        // Global Exam Submission
+        function submitExam() {
+            const answeredCount = Object.keys(appState.answers).length;
+            const totalCount = dbQuestions.length;
+
+            if (answeredCount < totalCount) {
+                showToast(`还差 ${totalCount - answeredCount} 道题没做哦！请在交卷前全部答完。`, 'warning');
+                return;
+            }
+
+            appState.examSubmitted = true;
+            document.getElementById('btn-exam-submit').classList.add('hidden');
+
+            let score = 0;
+            dbQuestions.forEach(q => {
+                if (appState.answers[q.id] === q.correct) {
+                    score++;
+                } else {
+                    appState.wrongQuestions.add(q.id);
+                }
+            });
+
+            const accuracy = Math.round((score / totalCount) * 100);
+            
+            // Show score panel replacement
+            showToast(`模考完毕！得分：${score}/${totalCount} (${accuracy}%)`, 'success');
+            
+            // Switch current rendering to include explanations
+            appState.currentIndex = 0;
+            renderActiveQuestion();
+            updateStats();
+        }
+
+        // Statistics updater
+        function updateStats() {
+            const answeredCount = Object.keys(appState.answers).length;
+            const totalCount = dbQuestions.length;
+
+            document.getElementById('lbl-answered-count').innerText = answeredCount;
+            document.getElementById('lbl-wrong-count').innerText = appState.wrongQuestions.size;
+
+            // Accuracy math
+            let accuracy = 0;
+            if (answeredCount > 0) {
+                let correctCount = 0;
+                Object.entries(appState.answers).forEach(([id, val]) => {
+                    const q = dbQuestions.find(item => item.id === id);
+                    if (q && q.correct === val) {
+                        correctCount++;
+                    }
+                });
+                accuracy = Math.round((correctCount / answeredCount) * 100);
+            }
+            document.getElementById('lbl-accuracy').innerText = `${accuracy}%`;
+
+            // Top Progress bar updating
+            const progressPercent = Math.round((answeredCount / totalCount) * 100);
+            document.getElementById('top-progress-bar').style.width = `${progressPercent}%`;
+        }
+
+        // Reset system
+        function resetAll() {
+            appState.answers = {};
+            appState.wrongQuestions.clear();
+            appState.starredQuestions.clear();
+            appState.examSubmitted = false;
+            appState.currentIndex = 0;
+            appState.filterMode = 'all';
+            appState.currentList = [...dbQuestions];
+
+            // Reset Pill highlight styles
+            document.getElementById('btn-filter-wrong').className = "text-slate-500 hover:text-rose-500 transition flex items-center gap-1";
+            document.getElementById('btn-exam-submit').classList.add('hidden');
+            
+            if (appState.currentMode === 'exam') {
+                document.getElementById('btn-exam-submit').classList.remove('hidden');
+            }
+
+            renderActiveQuestion();
+            updateStats();
+            showToast('数据已经全部重置啦，快来开始新一轮的练习吧！', 'success');
+        }
+
+        // Modern Mobile Notification Toast Component
+        function showToast(msg, type) {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 p-3.5 rounded-2xl shadow-xl transition-all duration-300 flex items-center space-x-2 text-xs border bg-slate-900 text-white border-slate-800 w-11/12 max-w-sm`;
+            toast.innerHTML = `
+                <i class="fa-solid fa-circle-info text-cyan-400"></i>
+                <span class="font-medium">${msg}</span>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // Launch mobile gestures walkthrough once
+        window.onload = function() {
+            renderActiveQuestion();
+            updateStats();
+
+            // Trigger swipe gesture tip momentarily for first-time use
+            const guide = document.getElementById('gesture-guide');
+            guide.classList.remove('opacity-0');
+            setTimeout(() => {
+                guide.classList.add('opacity-0');
+            }, 2000);
+        };
+    </script>
+</body>
+</html>
